@@ -2,8 +2,8 @@ clickhouse:
   image: yandex/clickhouse-server:1.1.54380
   volumes:
   - "./rollup.xml:/etc/clickhouse-server/config.d/rollup.xml"
-  - "./data/clickhouse/data/default:/var/lib/clickhouse/data/default"
-  - "./data/clickhouse/metadata/default:/var/lib/clickhouse/metadata/default"
+  - "./data/clickhouse/data:/var/lib/clickhouse/data"
+  - "./data/clickhouse/metadata:/var/lib/clickhouse/metadata"
 clickhouse-init:
   image: yandex/clickhouse-server:1.1.54380
   volumes:
