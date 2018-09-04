@@ -1,5 +1,5 @@
 ## Work scheme
-![schema.jpg](schema.jpg)
+![schema.jpg](doc/schema.jpg)
 
 # Quick Start
 ```sh
