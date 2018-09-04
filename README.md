@@ -1,5 +1,5 @@
-## Work scheme
-![schema.jpg](doc/schema.jpg)
+# graphite-clickhouse-tldr
+Graphite-ClickHouse + Grafana + StatsD with Docker-compose
 
 # Quick Start
 ```sh
@@ -8,6 +8,9 @@ cd graphite-clickhouse-tldr
 docker-compose up
 ```
 Open http://127.0.0.1:3000/ in browser
+
+## Work scheme
+![schema.jpg](doc/schema.jpg)
 
 ### Mapped Ports
 
