@@ -1,6 +1,6 @@
 # Quick Start
 ```sh
-git clone https://github.com/vkolobaev/graphite-clickhouse-tldr
+git clone https://github.com/kolobaev/graphite-clickhouse-tldr.git
 cd graphite-clickhouse-tldr
 docker-compose up
 ```
