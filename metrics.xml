@@ -1,0 +1,14 @@
+<yandex>
+    <use_graphite>true</use_graphite>
+    <graphite>
+        <host>carbon-clickhouse</host>
+        <port>2003</port>
+        <timeout>1</timeout>
+        <interval>10</interval>
+        <root_path>resources.monitoring.clickhouse</root_path>
+
+        <metrics>true</metrics>
+        <events>true</events>
+        <asynchronous_metrics>true</asynchronous_metrics>
+    </graphite>
+</yandex>

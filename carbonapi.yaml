@@ -1,0 +1,53 @@
+# Listen address, should always include hostname or ip address and a port.
+listen: ":80"
+# Max concurrent requests to CarbonZipper
+concurency: 2000000
+cache:
+   # Type of caching. Valid: "mem", "memcache", "null"
+   type: "mem"
+   # Cache limit in megabytes
+   size_mb: 100000
+   # Default cache timeout value. Identical to DEFAULT_CACHE_DURATION in graphite-web.
+   defaultTimeoutSec: 15
+   # Only used by memcache type of cache. List of memcache servers.
+   memcachedServers:
+       - "127.0.0.1:1234"
+       - "127.0.0.2:1235"
+# Amount of CPUs to use. 0 - unlimited
+cpus: 0
+tz: ""
+sendGlobsAsIs: true
+alwaysSendGlobsAsIs: true
+maxBatchSize: 1000000
+graphite:
+    # Host:port where to send internal metrics
+    # Empty = disabled
+    host: "carbon-clickhouse:2003"
+    interval: "10s"
+    prefix: "resources.monitoring.carbonapi"
+# Maximium idle connections to carbonzipper
+idleConnections: 100000
+pidFile: ""
+logger:
+    - logger: ""
+      file: "stderr"
+      level: "debug"
+      encoding: "console"
+      encodingTime: "iso8601"
+      encodingDuration: "seconds"
+    - logger: ""
+      file: "/var/log/carbonapi.log"
+      level: "error"
+      encoding: "json"
+    - logger: "access"
+      file: "/var/log/carbonapi_access.log"
+      level: "info"
+      encoding: "json"
+upstreams:
+    timeouts:
+        global: "60s"
+        afterStarted: "60s"
+    backends:
+        - "http://graphite-clickhouse:9090"
+tagdb:
+    url: "http://graphite-clickhouse:9090"

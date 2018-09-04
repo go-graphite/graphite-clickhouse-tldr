@@ -1,46 +1,90 @@
-clickhouse:
-  image: yandex/clickhouse-server:1.1.54380
-  volumes:
-  - "./rollup.xml:/etc/clickhouse-server/config.d/rollup.xml"
-  - "./data/clickhouse/data:/var/lib/clickhouse/data"
-  - "./data/clickhouse/metadata:/var/lib/clickhouse/metadata"
-clickhouse-init:
-  image: yandex/clickhouse-server:1.1.54380
-  volumes:
-  - "./init.sql:/init.sql"
-  entrypoint: |
-    bash -c '
-      sleep 5
-      export HOME=/var/lib/clickhouse/
-      cat /init.sql | clickhouse client --host clickhouse --multiquery'
-  links:
-  - clickhouse
-carbon-clickhouse:
-  image: lomik/carbon-clickhouse:0.8.2
-  volumes:
-  - "./data/carbon-clickhouse:/data/carbon-clickhouse"
-  - "./carbon-clickhouse.conf:/etc/carbon-clickhouse/carbon-clickhouse.conf"
-  ports:
-  - "2003:2003" # plain tcp
-  - "2003:2003/udp" # plain udp
-  - "2004:2004" # pickle
-  - "2006:2006" # prometheus remote write
-  links:
-  - clickhouse
-graphite-clickhouse:
-  image: lomik/graphite-clickhouse:latest
-  volumes:
-  - "./rollup.xml:/etc/graphite-clickhouse/rollup.xml"
-  - "./graphite-clickhouse.conf:/etc/graphite-clickhouse/graphite-clickhouse.conf"
-  links:
-  - clickhouse
-graphite-web:
-  image: graphiteapp/graphite-statsd:1.1.3
-  volumes:
-  - "./graphiteweb_entrypoint.sh:/entrypoint.sh"
-  - "./graphiteweb.conf:/opt/graphite/webapp/graphite/local_settings.py"
-  entrypoint: /entrypoint.sh
-  links:
-    - graphite-clickhouse
-  ports:
-  - "80:80" # http ui
+version: '3.5'
+services:
+  clickhouse:
+    image: yandex/clickhouse-server:1.1.54380
+    volumes:
+    - "./rollup.xml:/etc/clickhouse-server/config.d/rollup.xml"
+    - "./metrics.xml:/etc/clickhouse-server/config.d/metrics.xml"
+    - "./data/clickhouse/data:/var/lib/clickhouse/data"
+    - "./data/clickhouse/metadata:/var/lib/clickhouse/metadata"
+    networks:
+    - default
+    labels:
+    - "collectd_docker_app"
+  clickhouse-init:
+    image: yandex/clickhouse-server:1.1.54380
+    volumes:
+    - "./init.sql:/init.sql"
+    entrypoint: |
+      bash -c '
+        sleep 5
+        export HOME=/var/lib/clickhouse/
+        cat /init.sql | clickhouse client --host clickhouse --multiquery'
+    networks:
+    - default
+  carbon-clickhouse:
+    image: lomik/carbon-clickhouse:0.8.2
+    volumes:
+    - "./data/carbon-clickhouse:/data/carbon-clickhouse/data"
+    - "./carbon-clickhouse.conf:/etc/carbon-clickhouse/carbon-clickhouse.conf"
+    ports:
+    - "2003:2003" # plain tcp
+    - "2003:2003/udp" # plain udp
+    - "2004:2004" # pickle
+    - "2006:2006" # prometheus remote write
+    networks:
+    - default
+  graphite-clickhouse:
+    image: lomik/graphite-clickhouse:latest
+    volumes:
+    - "./rollup.xml:/etc/graphite-clickhouse/rollup.xml"
+    - "./graphite-clickhouse.conf:/etc/graphite-clickhouse/graphite-clickhouse.conf"
+    networks:
+    - default
+  carbonapi:
+    image: openmetric/carbonapi
+    volumes:
+    - "./carbonapi.yaml:/etc/carbonapi.yaml"
+    entrypoint: |
+      sh -c 'carbonapi -config /etc/carbonapi.yaml'
+    ports:
+    - "80:80"
+    networks:
+    - default
+  grafana:
+    image: grafana/grafana:5.2.3
+    volumes:
+    - "./grafana/grafana.ini:/etc/grafana/grafana.ini"
+    - "./grafana/provisioning:/etc/grafana/provisioning"
+    - "./grafana/graphite-clickhouse.json:/var/lib/grafana/dashboards/graphite-clickhouse.json"
+    ports:
+    - "3000:3000"
+    networks:
+    - default
+  telegraf:
+    hostname: apphost
+    image: "telegraf"
+    environment:
+    - "HOST_PROC: /rootfs/proc"
+    - "HOST_SYS: /rootfs/sys"
+    - "HOST_ETC: /rootfs/etc"
+    volumes:
+    - "./telegraf.conf:/etc/telegraf/telegraf.conf:ro"
+    - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    - "/sys:/rootfs/sys:ro"
+    - "/proc:/rootfs/proc:ro"
+    - "/etc:/rootfs/etc:ro"
+    networks:
+    - default
+  bioyino:
+    image: vkolobaev/bioyino:latest
+    volumes:
+    - "./bioyino.toml:/etc/bioyino/bioyino.toml"
+    ports:
+    - "8126:8126/udp"
+    - "8136:8136"
+    networks:
+    - default
+
+networks:
+  default:

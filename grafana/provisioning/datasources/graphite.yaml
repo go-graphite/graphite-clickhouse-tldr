@@ -1,0 +1,10 @@
+# # config file version
+apiVersion: 1
+
+datasources:
+ - name: graphite
+   type: graphite
+   access: proxy
+   orgId: 1
+   url: http://carbonapi:80
+   isDefault: True

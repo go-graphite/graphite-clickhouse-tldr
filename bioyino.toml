@@ -1,0 +1,99 @@
+# This is an example config showing all the options, filled with default values
+
+verbosity = "info"
+
+# Number of network worker threads in any mode, use 0(not recommended) to use all CPU cores
+n-threads = 1
+
+# Number of aggregating and counting threads, use 0(not recommended) to use all CPU cores
+w-threads = 1
+
+# Queue size for single counting thread before packet is dropped
+task-queue-size = 1
+
+# How often to gather own stats, in ms. Use 0 to disable (stats are still gathered and printed to log,
+# but not included in metric dump
+stats-interval = 1000
+
+# Prefix for sending own stats
+stats-prefix = "resources.monitoring.bioyino"
+
+[metrics]
+# Should we provide metrics that update more than update-counter-threshold times diring aggregation interval
+count-updates = true
+
+# Prefix for metric update statistics (no trailing dot!)
+update-counter-prefix = "resources.monitoring.bioyino.updates"
+
+# Suffix for metric update statistics (no leading dot!)
+update-counter-suffix = ""
+
+# Minimal update counter to be reported
+update-counter-threshold = 200
+
+[carbon]
+
+# IP and port of the carbon-protocol backend to send aggregated data to
+address = "carbon-clickhouse:2003"
+
+# How often to send metrics to carbon backend, ms
+interval = 10000
+
+# How much to sleep when connection to backend fails, ms
+connect-delay = 250
+
+# Multiply delay to this value for each consequent connection failure, float
+connect-delay-multiplier = 2
+
+# Maximum retry delay, ms
+connect-delay-max = 10000
+
+# How much times to retry when sending data to backend before giving up and dropping all metrics
+#note, that 0 means 1 try
+send-retries = 30
+
+# Network settings
+[network]
+# Address:port to listen for metrics at
+listen = "0.0.0.0:8126"
+
+# Address and port for replication/command server to listen on
+peer-listen = "0.0.0.0:8136"
+
+# UDP buffer size for single packet. Needs to be around MTU. Packet's bytes after that value
+# may be lost
+bufsize = 1500
+
+# Enable multimessage(recvmmsg) mode
+multimessage = false
+
+# Number of multimessage packets to receive at once if in multimessage mode
+mm-packets = 1
+
+# Nmber of green threads for single-message mode
+greens = 1
+
+# Socket pool size for single-message mode
+snum = 1
+
+# List of nodes to replicate metrics to
+nodes = []
+
+# Interval to send snapshots to nodes, ms
+snapshot-interval = 1000
+
+[consul]
+# Start in disabled leader finding mode
+start-disabled = false
+
+# Consul agent address
+agent = "127.0.0.1:8500"
+
+# TTL of consul session, ms (Consul cannot set it to less than 10s)
+session-ttl = 11000
+
+# How often to renew Consul session, ms
+renew-time = 1000
+
+# Key name to lock in Consul
+key-name = "service/bioyino/lock"
