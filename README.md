@@ -10,7 +10,7 @@ docker-compose up
 Open http://127.0.0.1:3000/ in browser
 
 ## Work scheme
-![schema.jpg](doc/schema.jpg)
+![schema.jpg](doc/schema.png?v3)
 
 ### Mapped Ports
 
