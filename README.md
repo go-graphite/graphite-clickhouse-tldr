@@ -1,3 +1,6 @@
+## Work scheme
+![schema.jpg](schema.jpg)
+
 # Quick Start
 ```sh
 git clone https://github.com/kolobaev/graphite-clickhouse-tldr.git
