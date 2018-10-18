@@ -16,7 +16,7 @@ clickhouse-init:
   links:
   - clickhouse
 carbon-clickhouse:
-  image: lomik/carbon-clickhouse:0.8.2
+  image: lomik/carbon-clickhouse:v0.9.0
   volumes:
   - "./data/carbon-clickhouse:/data/carbon-clickhouse"
   - "./carbon-clickhouse.conf:/etc/carbon-clickhouse/carbon-clickhouse.conf"
@@ -28,7 +28,7 @@ carbon-clickhouse:
   links:
   - clickhouse
 graphite-clickhouse:
-  image: lomik/graphite-clickhouse:latest
+  image: lomik/graphite-clickhouse:v0.8.0
   volumes:
   - "./rollup.xml:/etc/graphite-clickhouse/rollup.xml"
   - "./graphite-clickhouse.conf:/etc/graphite-clickhouse/graphite-clickhouse.conf"
