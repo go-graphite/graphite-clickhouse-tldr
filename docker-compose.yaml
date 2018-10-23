@@ -16,7 +16,7 @@ clickhouse-init:
   links:
   - clickhouse
 carbon-clickhouse:
-  image: lomik/carbon-clickhouse:v0.9.0
+  image: lomik/carbon-clickhouse:v0.9.1
   volumes:
   - "./data/carbon-clickhouse:/data/carbon-clickhouse"
   - "./carbon-clickhouse.conf:/etc/carbon-clickhouse/carbon-clickhouse.conf"
