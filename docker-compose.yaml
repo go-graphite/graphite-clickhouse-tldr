@@ -28,7 +28,7 @@ carbon-clickhouse:
   links:
   - clickhouse
 graphite-clickhouse:
-  image: lomik/graphite-clickhouse:v0.8.0
+  image: lomik/graphite-clickhouse:v0.8.1
   volumes:
   - "./rollup.xml:/etc/graphite-clickhouse/rollup.xml"
   - "./graphite-clickhouse.conf:/etc/graphite-clickhouse/graphite-clickhouse.conf"
