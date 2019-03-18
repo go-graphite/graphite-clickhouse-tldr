@@ -1,20 +1,10 @@
 clickhouse:
-  image: yandex/clickhouse-server:1.1.54380
+  image: yandex/clickhouse-server:19.1
   volumes:
   - "./rollup.xml:/etc/clickhouse-server/config.d/rollup.xml"
+  - "./init.sql:/docker-entrypoint-initdb.d/init.sql"
   - "./data/clickhouse/data:/var/lib/clickhouse/data"
   - "./data/clickhouse/metadata:/var/lib/clickhouse/metadata"
-clickhouse-init:
-  image: yandex/clickhouse-server:1.1.54380
-  volumes:
-  - "./init.sql:/init.sql"
-  entrypoint: |
-    bash -c '
-      sleep 5
-      export HOME=/var/lib/clickhouse/
-      cat /init.sql | clickhouse client --host clickhouse --multiquery'
-  links:
-  - clickhouse
 carbon-clickhouse:
   image: lomik/carbon-clickhouse:v0.9.1
   volumes:
