@@ -1,12 +1,12 @@
 clickhouse:
-  image: yandex/clickhouse-server:19.1
+  image: yandex/clickhouse-server:19.6.2.11
   volumes:
   - "./rollup.xml:/etc/clickhouse-server/config.d/rollup.xml"
   - "./init.sql:/docker-entrypoint-initdb.d/init.sql"
   - "./data/clickhouse/data:/var/lib/clickhouse/data"
   - "./data/clickhouse/metadata:/var/lib/clickhouse/metadata"
 carbon-clickhouse:
-  image: lomik/carbon-clickhouse:v0.9.1
+  image: lomik/carbon-clickhouse:v0.10.0
   volumes:
   - "./data/carbon-clickhouse:/data/carbon-clickhouse"
   - "./carbon-clickhouse.conf:/etc/carbon-clickhouse/carbon-clickhouse.conf"
@@ -18,9 +18,8 @@ carbon-clickhouse:
   links:
   - clickhouse
 graphite-clickhouse:
-  image: lomik/graphite-clickhouse:v0.8.5
+  image: lomik/graphite-clickhouse:v0.9.0
   volumes:
-  - "./rollup.xml:/etc/graphite-clickhouse/rollup.xml"
   - "./graphite-clickhouse.conf:/etc/graphite-clickhouse/graphite-clickhouse.conf"
   links:
   - clickhouse
