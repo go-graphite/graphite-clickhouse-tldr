@@ -1,5 +1,9 @@
 <yandex>
     <graphite_rollup>
+        <path_column_name>Path</path_column_name>
+        <time_column_name>Time</time_column_name>
+        <value_column_name>Value</value_column_name>
+        <version_column_name>Timestamp</version_column_name>
         <default>
             <function>avg</function>
             <retention>
