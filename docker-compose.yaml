@@ -6,7 +6,7 @@ clickhouse:
   - "./data/clickhouse/data:/var/lib/clickhouse/data"
   - "./data/clickhouse/metadata:/var/lib/clickhouse/metadata"
 carbon-clickhouse:
-  image: lomik/carbon-clickhouse:v0.10.0
+  image: lomik/carbon-clickhouse:v0.10.2
   volumes:
   - "./data/carbon-clickhouse:/data/carbon-clickhouse"
   - "./carbon-clickhouse.conf:/etc/carbon-clickhouse/carbon-clickhouse.conf"
@@ -18,8 +18,9 @@ carbon-clickhouse:
   links:
   - clickhouse
 graphite-clickhouse:
-  image: lomik/graphite-clickhouse:v0.9.0
+  image: lomik/graphite-clickhouse:v0.11.1
   volumes:
+  - "./rollup.xml:/etc/graphite-clickhouse/rollup.xml"
   - "./graphite-clickhouse.conf:/etc/graphite-clickhouse/graphite-clickhouse.conf"
   links:
   - clickhouse
