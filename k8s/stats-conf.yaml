@@ -1,0 +1,163 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: stats-conf
+  labels:
+    app: graphite
+data:
+  carbon.relay.conf: |
+    [common]
+    # Prefix for store all internal carbon-clickhouse graphs. Supported macroses: {host}
+    metric-prefix = "carbon.agents.{host}"
+    # Endpoint for store internal carbon metrics. Valid values: "" or "local", "tcp://host:port", "udp://host:port"
+    metric-endpoint = "local"
+    # Interval of storing internal metrics. Like CARBON_METRIC_INTERVAL
+    metric-interval = "10s"
+    # GOMAXPROCS
+    max-cpu = 1
+
+    [logging]
+    # "stderr", "stdout" can be used as file name
+    file = "stdout"
+    # Logging error level. Valid values: "debug", "info", "warn" "error"
+    level = "warn"
+
+    [data]
+    # Folder for buffering received data
+    path = "/data/carbon-clickhouse/"
+    # Rotate (and upload) file interval.
+    # Minimize chunk-interval for minimize lag between point receive and store
+    chunk-interval = "1s"
+    # Auto-increase chunk interval if the number of unprocessed files is grown
+    # Sample, set chunk interval to 10 if unhandled files count >= 5 and set to 60s if unhandled files count >= 20:
+    # chunk-auto-interval = "5:10s,20:60s"
+    chunk-auto-interval = "5:5s,10:60s"
+
+    [upload.graphite_reverse]
+    type = "points-reverse"
+    table = "graphite_reverse"
+    threads = 1
+    url = "http://ch-stats/"
+    timeout = "1m0s"
+
+    [upload.graphite_index]
+    type = "index"
+    table = "graphite_index"
+    threads = 1
+    url = "http://ch-stats/"
+    timeout = "1m0s"
+    cache-ttl = "12h0m0s"
+
+    [upload.graphite_tagged]
+    type = "tagged"
+    table = "graphite_tagged"
+    threads = 1
+    url = "http://ch-stats/"
+    timeout = "1m0s"
+    cache-ttl = "12h0m0s"
+
+    [udp]
+    listen = ":2003"
+    enabled = false
+
+    [tcp]
+    listen = ":2003"
+    enabled = true
+
+    [pickle]
+    listen = ":2004"
+    enabled = true
+
+    [prometheus]
+    listen = ":2006"
+    enabled = false
+
+    # https://github.com/lomik/carbon-clickhouse/blob/master/grpc/carbon.proto
+    [grpc]
+    listen = ":2005"
+    enabled = false
+
+    [pprof]
+    listen = "localhost:7007"
+    enabled = false
+  graphite.api.conf: |
+    [common]
+    listen = ":9090"
+    max-cpu = 8
+
+    [clickhouse]
+    url = "http://ch-stats/?max_query_size=268435456&max_ast_elements=1000000"
+    index-table = "graphite_index"
+    data-timeout = "1m0s"
+    index-timeout = "1m0s"
+    tagged-table = "graphite_tagged"
+
+    [[data-table]]
+    table = "graphite_reverse"
+    reverse = true
+    rollup-conf = "/etc/graphite-clickhouse/rollup.xml"
+
+    [logging]
+    file = "stdout"
+    level = "info"
+  carbonapi.yml: |
+    listen: 0.0.0.0:80
+    upstreams:
+      backends:
+        - http://stat-api
+    logger:
+        - logger: ""
+          file: "stdout"
+          level: "warn"
+          encoding: "console"
+    tagdb:
+          url: "http://stat-api:9090"
+  init.sql: |
+    CREATE TABLE IF NOT EXISTS default.graphite_reverse (
+      Path String,  
+      Value Float64,  
+      Time UInt32,  
+      Date Date,  
+      Timestamp UInt32
+    ) ENGINE = GraphiteMergeTree('graphite_rollup')
+    PARTITION BY toYYYYMM(Date)
+    ORDER BY (Path, Time);
+
+    CREATE TABLE IF NOT EXISTS default.graphite_index (
+      Date Date,
+      Level UInt32,
+      Path String,
+      Version UInt32
+    ) ENGINE = ReplacingMergeTree(Version)
+    PARTITION BY toYYYYMM(Date)
+    ORDER BY (Level, Path, Date);
+
+    CREATE TABLE IF NOT EXISTS default.graphite_tagged (
+      Date Date,
+      Tag1 String,
+      Path String,
+      Tags Array(String),
+      Version UInt32
+    ) ENGINE = ReplacingMergeTree(Version)
+    PARTITION BY toYYYYMM(Date)
+    ORDER BY (Tag1, Path, Date);
+  rollup.xml: |
+    <yandex>
+        <graphite_rollup>
+            <path_column_name>Path</path_column_name>
+            <time_column_name>Time</time_column_name>
+            <value_column_name>Value</value_column_name>
+            <version_column_name>Timestamp</version_column_name>
+            <default>
+                <function>avg</function>
+                <retention>
+                    <age>0</age>
+                    <precision>60</precision>
+                </retention>
+                <retention>
+                    <age>2592000</age>
+                    <precision>3600</precision>
+                </retention>
+            </default>
+        </graphite_rollup>
+    </yandex>

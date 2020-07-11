@@ -1,0 +1,96 @@
+apiVersion: "clickhouse.altinity.com/v1"
+kind: "ClickHouseInstallation"
+metadata:
+  name: "stats"
+spec:
+  defaults:
+    templates:
+      dataVolumeClaimTemplate: volume-template
+      logVolumeClaimTemplate: log-volume-template
+      serviceTemplate: chi-service-template
+      podTemplate: clickhouse:19.6
+  configuration:
+    users:
+      default/networks/ip:
+        - "10.0.0.0/8"
+        - "127.0.0.1/32"
+    clusters:
+      - name: "default"
+        layout:
+          shardsCount: 1
+          replicasCount: 1
+    files:
+      logs.xml: |
+        <yandex>
+          <logger>
+              <level>warning</level>
+              <log>/var/log/clickhouse-server/clickhouse-server.log</log>
+              <errorlog>/var/log/clickhouse-server/clickhouse-server.err.log</errorlog>
+              <size>1000M</size>
+              <count>10</count>
+          </logger>
+        </yandex>
+      rollup.xml: |
+        <yandex>
+            <graphite_rollup>
+                <path_column_name>Path</path_column_name>
+                <time_column_name>Time</time_column_name>
+                <value_column_name>Value</value_column_name>
+                <version_column_name>Timestamp</version_column_name>
+                <default>
+                    <function>avg</function>
+                    <retention>
+                        <age>0</age>
+                        <precision>60</precision>
+                    </retention>
+                    <retention>
+                        <age>2592000</age>
+                        <precision>3600</precision>
+                    </retention>
+                </default>
+            </graphite_rollup>
+        </yandex>
+  templates:
+    podTemplates:
+      - name: clickhouse:19.6
+        spec:
+          volumes:
+          - name: stats-conf
+            configMap:
+              name: stats-conf
+          containers:
+            - name: clickhouse-pod
+              image: yandex/clickhouse-server:19.6.2.11
+              volumeMounts:
+              - name: stats-conf
+                mountPath: /docker-entrypoint-initdb.d/init.sql
+                subPath: init.sql
+    serviceTemplates:
+      - name: chi-service-template
+        generateName: "ch-stats"
+        spec:
+          ports:
+            - name: http
+              port: 80
+              targetPort: 8123
+            - name: client
+              port: 9440
+              targetPort: 9000
+          type: ClusterIP
+    volumeClaimTemplates:
+      - name: volume-template
+        spec:
+          storageClassName: gp2
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 15Gi
+      - name: log-volume-template
+        spec:
+          storageClassName: gp2
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 2Gi
