@@ -1,7 +1,7 @@
 version: "3.5"
 services:
   clickhouse:
-    image: yandex/clickhouse-server:19.6.2.11
+    image: clickhouse/clickhouse-server:21.8
     volumes:
     - "./rollup.xml:/etc/clickhouse-server/config.d/rollup.xml"
     - "./init.sql:/docker-entrypoint-initdb.d/init.sql"
