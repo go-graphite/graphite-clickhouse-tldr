@@ -1,3 +1,13 @@
+CREATE TABLE IF NOT EXISTS default.graphite_data (
+  Path String CODEC(ZSTD(3)),
+  Value Float64 CODEC(Gorilla, LZ4),
+  Time UInt32 CODEC(DoubleDelta, LZ4),
+  Date Date CODEC(DoubleDelta, LZ4),
+  Timestamp UInt32 CODEC(DoubleDelta, LZ4) TTL Date + INTERVAL 1 MONTH
+) ENGINE = GraphiteMergeTree('graphite_rollup')
+PARTITION BY toYYYYMMDD(Date)
+ORDER BY (Path, Time);
+
 CREATE TABLE IF NOT EXISTS default.graphite_reverse (
   Path String CODEC(ZSTD(3)),
   Value Float64 CODEC(Gorilla, LZ4),
