@@ -22,7 +22,7 @@ services:
     networks:
       - graphite-clickhouse-tldr
   graphite-clickhouse:
-    image: lomik/graphite-clickhouse:v0.11.1
+    image: lomik/graphite-clickhouse:v0.13.0
     volumes:
     - "./rollup.xml:/etc/graphite-clickhouse/rollup.xml"
     - "./graphite-clickhouse.conf:/etc/graphite-clickhouse/graphite-clickhouse.conf"
