@@ -10,7 +10,7 @@ services:
     networks:
       - graphite-clickhouse-tldr
   carbon-clickhouse:
-    image: lomik/carbon-clickhouse:v0.10.2
+    image: lomik/carbon-clickhouse:v0.11.1
     volumes:
     - "./data/carbon-clickhouse:/data/carbon-clickhouse"
     - "./carbon-clickhouse.conf:/etc/carbon-clickhouse/carbon-clickhouse.conf"
