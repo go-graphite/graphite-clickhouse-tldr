@@ -29,7 +29,7 @@ services:
     networks:
       - graphite-clickhouse-tldr
   graphite-web:
-    image: graphiteapp/graphite-statsd:1.1.3
+    image: graphiteapp/graphite-statsd:1.1.8-1
     volumes:
     - "./graphiteweb_entrypoint.sh:/entrypoint.sh"
     - "./graphiteweb.conf:/opt/graphite/webapp/graphite/local_settings.py"
