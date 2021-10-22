@@ -10,7 +10,7 @@ services:
     networks:
       - graphite-clickhouse-tldr
   carbon-clickhouse:
-    image: lomik/carbon-clickhouse:v0.11.1
+    image: ghcr.io/lomik/carbon-clickhouse:0.11.2
     user: "${UID:?You must do 'export UID' to launch}"
     volumes:
     - "./data:/data"
@@ -23,7 +23,7 @@ services:
     networks:
       - graphite-clickhouse-tldr
   graphite-clickhouse:
-    image: lomik/graphite-clickhouse:v0.13.0
+    image: ghcr.io/lomik/graphite-clickhouse:0.13.2
     volumes:
     - "./rollup.xml:/etc/graphite-clickhouse/rollup.xml"
     - "./graphite-clickhouse.conf:/etc/graphite-clickhouse/graphite-clickhouse.conf"
