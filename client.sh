@@ -1,6 +1,4 @@
 #!/bin/sh
 
-docker-compose exec clickhouse bash -c "
-    export HOME=/var/lib/clickhouse/
-    exec clickhouse client
-"
+export UID
+docker-compose exec -e HOME=/var/lib/clickhouse/ clickhouse clickhouse-client

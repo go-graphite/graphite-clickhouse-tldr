@@ -1,36 +1,44 @@
-clickhouse:
-  image: yandex/clickhouse-server:19.6.2.11
-  volumes:
-  - "./rollup.xml:/etc/clickhouse-server/config.d/rollup.xml"
-  - "./init.sql:/docker-entrypoint-initdb.d/init.sql"
-  - "./data/clickhouse/data:/var/lib/clickhouse/data"
-  - "./data/clickhouse/metadata:/var/lib/clickhouse/metadata"
-carbon-clickhouse:
-  image: lomik/carbon-clickhouse:v0.10.2
-  volumes:
-  - "./data/carbon-clickhouse:/data/carbon-clickhouse"
-  - "./carbon-clickhouse.conf:/etc/carbon-clickhouse/carbon-clickhouse.conf"
-  ports:
-  - "2003:2003" # plain tcp
-  - "2003:2003/udp" # plain udp
-  - "2004:2004" # pickle
-  - "2006:2006" # prometheus remote write
-  links:
-  - clickhouse
-graphite-clickhouse:
-  image: lomik/graphite-clickhouse:v0.11.1
-  volumes:
-  - "./rollup.xml:/etc/graphite-clickhouse/rollup.xml"
-  - "./graphite-clickhouse.conf:/etc/graphite-clickhouse/graphite-clickhouse.conf"
-  links:
-  - clickhouse
-graphite-web:
-  image: graphiteapp/graphite-statsd:1.1.3
-  volumes:
-  - "./graphiteweb_entrypoint.sh:/entrypoint.sh"
-  - "./graphiteweb.conf:/opt/graphite/webapp/graphite/local_settings.py"
-  entrypoint: /entrypoint.sh
-  links:
-    - graphite-clickhouse
-  ports:
-  - "80:80" # http ui
+version: "3.5"
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:21.8
+    user: "${UID:?You must do 'export UID' to launch}"
+    volumes:
+    - "./rollup.xml:/etc/clickhouse-server/config.d/rollup.xml"
+    - "./init.sql:/docker-entrypoint-initdb.d/init.sql"
+    - "./data/clickhouse:/var/lib/clickhouse"
+    networks:
+      - graphite-clickhouse-tldr
+  carbon-clickhouse:
+    image: ghcr.io/lomik/carbon-clickhouse:0.11.2
+    user: "${UID:?You must do 'export UID' to launch}"
+    volumes:
+    - "./data:/data"
+    - "./carbon-clickhouse.conf:/etc/carbon-clickhouse/carbon-clickhouse.conf"
+    ports:
+    - "2003:2003" # plain tcp
+    - "2003:2003/udp" # plain udp
+    - "2004:2004" # pickle
+    - "2006:2006" # prometheus remote write
+    networks:
+      - graphite-clickhouse-tldr
+  graphite-clickhouse:
+    image: ghcr.io/lomik/graphite-clickhouse:0.13.2
+    volumes:
+    - "./rollup.xml:/etc/graphite-clickhouse/rollup.xml"
+    - "./graphite-clickhouse.conf:/etc/graphite-clickhouse/graphite-clickhouse.conf"
+    networks:
+      - graphite-clickhouse-tldr
+  graphite-web:
+    image: graphiteapp/graphite-statsd:1.1.8-1
+    volumes:
+    - "./graphiteweb_entrypoint.sh:/entrypoint.sh"
+    - "./graphiteweb.conf:/opt/graphite/webapp/graphite/local_settings.py"
+    entrypoint: /entrypoint.sh
+    networks:
+      - graphite-clickhouse-tldr
+    ports:
+    - "80:80" # http ui
+
+networks:
+  graphite-clickhouse-tldr:

@@ -2,6 +2,7 @@
 ```sh
 git clone https://github.com/lomik/graphite-clickhouse-tldr
 cd graphite-clickhouse-tldr
+export UID
 docker-compose up
 ```
 Open http://127.0.0.1/ in browser

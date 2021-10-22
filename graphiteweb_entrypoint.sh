@@ -1,8 +1,10 @@
 #!/bin/sh
 
 # disable daemons
-rm -rf /etc/service/carbon
-rm -rf /etc/service/carbon-aggregator
+rm -rf /etc/service/brubeck
+rm -rf /etc/service/carbon*
+rm -rf /etc/service/collectd
+rm -rf /etc/service/go-carbon
 rm -rf /etc/service/statsd
 
-exec /sbin/my_init
+exec /entrypoint "${@}"
